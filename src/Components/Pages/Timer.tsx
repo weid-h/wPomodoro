@@ -21,6 +21,14 @@ const useStyles = makeStyles({
   Center: {
     textAlign: "center",
   },
+  customProgress:{
+      height:"1rem",
+      marginBottom:"0.5rem",
+      marginRight:"1rem",
+      marginLeft:"1rem",
+      backgroundColor:"red",
+      borderRadius:"20px"
+  }
 });
 
 const formatTimeString = (seconds: number) => {
@@ -128,7 +136,7 @@ const Timer = (props: any) => {
       <Grid item xs={12}>
         <Card variant="elevation" className={classes.Center}>
           <Typography variant="h1">{formatTimeString(timeLeft)}</Typography>
-          <LinearProgress variant="determinate" value={progress} />
+          <LinearProgress className={classes.customProgress} variant="determinate" value={progress} />
         </Card>
       </Grid>
       <Grid item xs={12}>
