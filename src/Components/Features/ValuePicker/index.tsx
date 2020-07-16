@@ -54,6 +54,7 @@ const ValuePicker = (props: ValuePickerProps) => {
         avatar={props.label == "minutes" ? <AccessAlarmIcon /> : <RepeatIcon />}
         label={`${props.value} ${props.label}`}
         onClick={handleClick}
+        color="default"
       />
       <Popover
         id={id}
