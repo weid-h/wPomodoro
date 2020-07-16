@@ -1,4 +1,11 @@
-import { Button, Grid, makeStyles, Typography } from "@material-ui/core";
+import {
+  Button,
+  Grid,
+  makeStyles,
+  Typography,
+  Divider,
+  Tooltip,
+} from "@material-ui/core";
 import AlarmOnIcon from "@material-ui/icons/AlarmOn";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
@@ -16,7 +23,7 @@ const Setup = (props: any) => {
   const context = useContext(AppContext);
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={3} className={classes.Center}>
       <Grid item xs={12}>
         <Typography variant="h4">wPomodoro setup</Typography>
       </Grid>
@@ -87,14 +94,16 @@ const Setup = (props: any) => {
         />
       </Grid>
       <Grid item xs={12} className={classes.Center}>
-        <Button
-          variant="contained"
-          color="primary"
-          component={Link}
-          to="/timer"
-        >
-          <AlarmOnIcon />
-        </Button>
+        <Tooltip title="Go!" aria-label="Go!">
+          <Button
+            variant="contained"
+            color="primary"
+            component={Link}
+            to="/timer"
+          >
+            <AlarmOnIcon />
+          </Button>
+        </Tooltip>
       </Grid>
     </Grid>
   );

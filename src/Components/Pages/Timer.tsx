@@ -5,6 +5,7 @@ import {
   LinearProgress,
   makeStyles,
   Typography,
+  Tooltip,
 } from "@material-ui/core";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import PauseIcon from "@material-ui/icons/Pause";
@@ -83,14 +84,17 @@ const Timer = (props: any) => {
     isRunning,
     toggleIsRunning,
     restartPhase,
-    nextPhase
+    nextPhase,
   ] = usePomodoroTimer(
     context.pomodoroSettings.workingMinutes,
     context.pomodoroSettings.workRepsBetweenRests,
     context.pomodoroSettings.shortRestMinutes,
     context.pomodoroSettings.longRestMinutes,
     (newPhase: any) => {
-      chime.play();
+      chime.play()
+      .catch(() => {
+          alert("You need to explicitly allow audio on your browser to hear chimes! :)")
+      });
     }
   );
 
@@ -138,42 +142,50 @@ const Timer = (props: any) => {
         </Card>
       </Grid>
       <Grid item xs={4} className={classes.Center}>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => {
-            restartPhase();
-          }}
-        >
-          <SkipPreviousIcon />
-        </Button>
+        <Tooltip title="Restart this phase" aria-label="Restart this phase">
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              restartPhase();
+            }}
+          >
+            <SkipPreviousIcon />
+          </Button>
+        </Tooltip>
       </Grid>
       <Grid item xs={4} className={classes.Center}>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => {
-            toggleIsRunning();
-          }}
-        >
-          {isRunning ? <PauseIcon /> : <PlayArrowIcon />}
-        </Button>
+        <Tooltip title="Pause" aria-label="Pause">
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              toggleIsRunning();
+            }}
+          >
+            {isRunning ? <PauseIcon /> : <PlayArrowIcon />}
+          </Button>
+        </Tooltip>
       </Grid>
       <Grid item xs={4} className={classes.Center}>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => {
-            nextPhase();
-          }}
-        >
-          <SkipNextIcon />
-        </Button>
+        <Tooltip title="Go to next phase" aria-label="Go to next phase">
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              nextPhase();
+            }}
+          >
+            <SkipNextIcon />
+          </Button>
+        </Tooltip>
       </Grid>
       <Grid item xs={12} className={classes.Center}>
-        <Button color="secondary" variant="contained" component={Link} to="/">
-          <ExitToAppIcon />
-        </Button>
+        <Tooltip title="Back to setup" aria-label="Back to setup">
+          <Button color="secondary" variant="contained" component={Link} to="/">
+            <ExitToAppIcon />
+          </Button>
+        </Tooltip>
       </Grid>
     </Grid>
   );
