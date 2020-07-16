@@ -1,21 +1,26 @@
 import React, { useState } from "react";
 
 export const AppContext = React.createContext<ApplicationContext>({
-  workingMinutes: 0,
-  setWorkingMinutes: () => {},
-  restingMinutes: 0,
-  setRestingMinutes: () => {},
+  pomodoroSettings: {
+    workingMinutes:0,
+    longRestMinutes:0,
+    shortRestMinutes:0,
+    workRepsBetweenRests:0
+  },
+  setPomodoroSettings: () => {}
 });
 
 export const useApplicationContext = () => {
-  const [workingMinutes, setWorkingMinutes] = useState(0.1);
-  const [restingMinutes, setRestingMinutes] = useState(0.1);
+  const [pomodoroSettings, setPomodoroSettings] = useState({
+    workingMinutes:15,
+    longRestMinutes:15,
+    shortRestMinutes:5,
+    workRepsBetweenRests:3
+  });
 
   const initialState:ApplicationContext = {
-    workingMinutes,
-    setWorkingMinutes,
-    restingMinutes,
-    setRestingMinutes
+    pomodoroSettings,
+    setPomodoroSettings
   };
 
   return [AppContext, initialState] as const;

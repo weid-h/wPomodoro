@@ -18,29 +18,72 @@ const Setup = (props: any) => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <Typography variant="h5">
-          For how many minutes will you be working?
-        </Typography>
+        <Typography variant="h4">wPomodoro setup</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="h5">Work period length:</Typography>
       </Grid>
       <Grid item xs={12}>
         <ValuePicker
           label="minutes"
           values={minuteValues()}
-          value={context.workingMinutes}
-          setValue={context.setWorkingMinutes}
+          value={context.pomodoroSettings.workingMinutes}
+          setValue={(value: number) =>
+            context.setPomodoroSettings({
+              ...context.pomodoroSettings,
+              workingMinutes: value,
+            })
+          }
         />
       </Grid>
       <Grid item xs={12}>
         <Typography variant="h5">
-          For how many minutes will you be resting?
+          Amount of repetitions between long rests:
         </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <ValuePicker
+          label="repetitions"
+          values={["1", "2", "3", "4", "5", "6"]}
+          value={context.pomodoroSettings.workRepsBetweenRests}
+          setValue={(value: number) =>
+            context.setPomodoroSettings({
+              ...context.pomodoroSettings,
+              workRepsBetweenRests: value,
+            })
+          }
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="h5">Short rest length:</Typography>
       </Grid>
       <Grid item xs={12}>
         <ValuePicker
           label="minutes"
           values={minuteValues()}
-          value={context.restingMinutes}
-          setValue={context.setRestingMinutes}
+          value={context.pomodoroSettings.shortRestMinutes}
+          setValue={(value: number) =>
+            context.setPomodoroSettings({
+              ...context.pomodoroSettings,
+              shortRestMinutes: value,
+            })
+          }
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="h5">Long rest length:</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <ValuePicker
+          label="minutes"
+          values={minuteValues()}
+          value={context.pomodoroSettings.longRestMinutes}
+          setValue={(value: number) =>
+            context.setPomodoroSettings({
+              ...context.pomodoroSettings,
+              longRestMinutes: value,
+            })
+          }
         />
       </Grid>
       <Grid item xs={12} className={classes.Center}>

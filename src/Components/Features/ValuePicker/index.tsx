@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import AccessAlarmIcon from "@material-ui/icons/AccessAlarm";
+import RepeatIcon from "@material-ui/icons/Repeat";
 import React from "react";
 
 const useStyles = makeStyles({
@@ -25,7 +26,7 @@ const useStyles = makeStyles({
 });
 
 type ValuePickerProps = {
-  label: string;
+  label: "minutes" | "repetitions";
   values: Array<string>;
   value: number;
   setValue: Function;
@@ -50,7 +51,7 @@ const ValuePicker = (props: ValuePickerProps) => {
   return (
     <>
       <Chip
-        avatar={<AccessAlarmIcon />}
+        avatar={props.label == "minutes" ? <AccessAlarmIcon /> : <RepeatIcon />}
         label={`${props.value} ${props.label}`}
         onClick={handleClick}
       />

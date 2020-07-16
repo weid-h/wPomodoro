@@ -41,7 +41,7 @@ type statProps = {
   workPeriods: number;
   pomodoros: number;
   workTime: number;
-  restTime: number;
+  workReps: number;
 };
 
 const Stats = (props: statProps) => {
@@ -55,21 +55,13 @@ const Stats = (props: statProps) => {
       </Grid>
       <Grid item xs={12}>
         <Typography variant="h6">
-          Completed{" "}
-          {props.pomodoros * Math.floor(0.2 / props.workTime) +
-            props.workPeriods}{" "}
-          work periods
+          Completed {props.pomodoros * props.workPeriods + props.workPeriods} work periods
         </Typography>
       </Grid>
       <Grid item xs={12}>
         <Typography variant="h6">
           Worked effectively for{" "}
-          {Math.floor(
-            (props.pomodoros * Math.floor(0.2 / props.workTime) +
-              props.workPeriods) *
-              props.workTime
-          )}{" "}
-          minutes
+          {props.pomodoros * props.workReps * props.workTime} minutes
         </Typography>
       </Grid>
     </Grid>
@@ -86,7 +78,7 @@ const Timer = (props: any) => {
   const [workPeriods, setWorkPeriods] = useState(0);
   const [pomodoros, setPomodoros] = useState(0);
   const [timeleft, setTimeLeft] = useState(
-    remainingTime(startTime, context.workingMinutes)
+    remainingTime(startTime, context.pomodoroSettings.workingMinutes)
   );
   const [progress, setProgress] = useState(0);
 
@@ -98,18 +90,28 @@ const Timer = (props: any) => {
     let remaining: number;
     switch (phase) {
       case "WORK":
-        remaining = remainingTime(startTime, context.workingMinutes);
+        remaining = remainingTime(
+          startTime,
+          context.pomodoroSettings.workingMinutes
+        );
         if (remaining >= 0) {
           timeout = setTimeout(() => {
             setTimeLeft(remaining);
-            setProgress(getProgress(remaining, context.workingMinutes * 60));
+            setProgress(
+              getProgress(
+                remaining,
+                context.pomodoroSettings.workingMinutes * 60
+              )
+            );
           }, 1000);
         } else {
           chime.play();
           setStartTime(new Date().getTime());
           setProgress(0);
-          // Whenever you have worked for 60 minutes or over, have a long rest.
-          if ((workPeriods + 1) * context.workingMinutes >= 0.2) {
+          if (
+            workPeriods + 1 >=
+            context.pomodoroSettings.workRepsBetweenRests
+          ) {
             setPhase("LONG REST");
             setWorkPeriods(workPeriods + 1);
           } else {
@@ -119,11 +121,19 @@ const Timer = (props: any) => {
         }
         break;
       case "SHORT REST":
-        remaining = remainingTime(startTime, context.restingMinutes);
+        remaining = remainingTime(
+          startTime,
+          context.pomodoroSettings.shortRestMinutes
+        );
         if (remaining >= 0) {
           timeout = setTimeout(() => {
             setTimeLeft(remaining);
-            setProgress(getProgress(remaining, context.restingMinutes * 60));
+            setProgress(
+              getProgress(
+                remaining,
+                context.pomodoroSettings.shortRestMinutes * 60
+              )
+            );
           }, 1000);
         } else {
           chime.play();
@@ -133,12 +143,18 @@ const Timer = (props: any) => {
         }
         break;
       case "LONG REST":
-        remaining = remainingTime(startTime, context.restingMinutes * 3);
+        remaining = remainingTime(
+          startTime,
+          context.pomodoroSettings.longRestMinutes
+        );
         if (remaining >= 0) {
           timeout = setTimeout(() => {
             setTimeLeft(remaining);
             setProgress(
-              getProgress(remaining, context.restingMinutes * 3 * 60)
+              getProgress(
+                remaining,
+                context.pomodoroSettings.longRestMinutes * 60
+              )
             );
           }, 1000);
         } else {
@@ -175,8 +191,8 @@ const Timer = (props: any) => {
           <Stats
             workPeriods={workPeriods}
             pomodoros={pomodoros}
-            workTime={context.workingMinutes}
-            restTime={context.restingMinutes}
+            workTime={context.pomodoroSettings.workingMinutes}
+            workReps={context.pomodoroSettings.workRepsBetweenRests}
           />
         </Card>
       </Grid>
