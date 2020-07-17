@@ -86,7 +86,7 @@ export const usePomodoroTimer = (
         break;
       case "SHORT REST":
         setPauseTimeLeft(0);
-        setTimeLeft(remainingTime(new Date().getTime(), longRestMinutes * 60));
+        setTimeLeft(remainingTime(new Date().getTime(), shortRestMinutes * 60));
         phaseChangeCallback("WORK");
         setStartTime(new Date().getTime());
         setPhase("WORK");
