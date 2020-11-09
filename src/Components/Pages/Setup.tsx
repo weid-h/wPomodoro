@@ -1,17 +1,8 @@
-import {
-  Button,
-  Grid,
-  makeStyles,
-  Typography,
-  Divider,
-  Tooltip,
-  Card,
-  CardContent,
-} from "@material-ui/core";
+import {Button, Card, CardContent, Grid, makeStyles, Tooltip, Typography,} from "@material-ui/core";
 import AlarmOnIcon from "@material-ui/icons/AlarmOn";
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import { AppContext } from "../../Contexts/ApplicationContext";
+import React, {useContext} from "react";
+import {Link} from "react-router-dom";
+import {AppContext} from "../../Contexts/ApplicationContext";
 import ValuePicker from "../Features/ValuePicker";
 
 const useStyles = makeStyles({
@@ -48,7 +39,7 @@ const SettingContainer = (props: {
   </Grid>
 );
 
-const Setup = (props: any) => {
+const Setup = () => {
   const classes = useStyles();
   const context = useContext(AppContext);
 

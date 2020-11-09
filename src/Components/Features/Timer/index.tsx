@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useState} from "react";
 
 declare type pomodoroPhase = "WORK" | "SHORT REST" | "LONG REST";
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 export const AppContext = React.createContext<ApplicationContext>({
   pomodoroSettings: {
@@ -9,19 +9,3 @@ export const AppContext = React.createContext<ApplicationContext>({
   },
   setPomodoroSettings: () => {}
 });
-
-export const useApplicationContext = () => {
-  const [pomodoroSettings, setPomodoroSettings] = useState({
-    workingMinutes:15,
-    longRestMinutes:15,
-    shortRestMinutes:5,
-    workRepsBetweenRests:3
-  });
-
-  const initialState:ApplicationContext = {
-    pomodoroSettings,
-    setPomodoroSettings
-  };
-
-  return [AppContext, initialState] as const;
-};

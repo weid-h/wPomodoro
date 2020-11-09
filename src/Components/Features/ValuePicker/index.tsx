@@ -51,7 +51,7 @@ const ValuePicker = (props: ValuePickerProps) => {
   return (
     <>
       <Chip
-        avatar={props.label == "minutes" ? <AccessAlarmIcon /> : <RepeatIcon />}
+        avatar={props.label === "minutes" ? <AccessAlarmIcon /> : <RepeatIcon />}
         label={`${props.value} ${props.label}`}
         onClick={handleClick}
         color="default"

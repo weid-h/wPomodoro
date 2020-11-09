@@ -1,9 +1,11 @@
 declare type ApplicationContext = {
-  pomodoroSettings: {
-    workingMinutes: number;
-    shortRestMinutes: number;
-    longRestMinutes: number;
-    workRepsBetweenRests: number;
-  };
+  pomodoroSettings: PomodoroSettings;
   setPomodoroSettings: Function;
 };
+
+declare type PomodoroSettings = {
+  workingMinutes: number;
+  shortRestMinutes: number;
+  longRestMinutes: number;
+  workRepsBetweenRests: number;
+}

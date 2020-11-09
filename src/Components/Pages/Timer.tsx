@@ -1,22 +1,15 @@
-import {
-    Button,
-    Card,
-    Grid,
-    LinearProgress,
-    makeStyles,
-    Typography,
-    Tooltip,
-} from "@material-ui/core";
+import {Button, Card, Grid, makeStyles, Tooltip, Typography,} from "@material-ui/core";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import PauseIcon from "@material-ui/icons/Pause";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import React, {useContext, useEffect, useMemo, useState} from "react";
+import React, {useContext, useMemo} from "react";
 import {Link} from "react-router-dom";
 import {AppContext} from "../../Contexts/ApplicationContext";
 import usePomodoroTimer from "../Features/Timer";
 import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
 import SkipNextIcon from "@material-ui/icons/SkipNext";
 import {Howl} from "howler"
+import {Helmet} from "react-helmet";
 
 const useStyles = makeStyles({
     Center: {
@@ -83,8 +76,6 @@ const Timer = (props: TimerProps) => {
     const classes = useStyles();
     const context = useContext(AppContext);
 
-    const [progress, setProgress] = useState(0);
-
     const [
         phase,
         timeLeft,
@@ -99,7 +90,7 @@ const Timer = (props: TimerProps) => {
         context.pomodoroSettings.workRepsBetweenRests,
         context.pomodoroSettings.shortRestMinutes,
         context.pomodoroSettings.longRestMinutes,
-        (newPhase: any) => {
+        () => {
             props.howl.play()
         }
     );
@@ -110,6 +101,9 @@ const Timer = (props: TimerProps) => {
 
     return (
         <Grid container spacing={2}>
+            <Helmet>
+                <title>{timeString}</title>
+            </Helmet>
             <Grid item xs={12} className={classes.Center}>
                 <Card variant="elevation">
                     <Typography variant="h3">{isRunning ? phase : "PAUSED"}</Typography>
