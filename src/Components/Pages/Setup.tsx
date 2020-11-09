@@ -18,7 +18,7 @@ const SettingContainer = (props: {
   header: string;
   label: "minutes" | "repetitions";
 }) => (
-  <Grid item xs={12} lg={3}>
+  <Grid item xs={6} lg={3}>
     <Card>
       <CardContent>
         <Grid container spacing={3}>
