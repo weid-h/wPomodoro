@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 
 declare type pomodoroPhase = "WORK" | "SHORT REST" | "LONG REST";
 
@@ -8,9 +8,9 @@ declare type pomodoroPhase = "WORK" | "SHORT REST" | "LONG REST";
  * @param totalPhaseTime total phase time in seconds
  */
 const remainingTime = (startTime: number, totalPhaseTime: number) => {
-  return Math.floor(
-    (startTime + totalPhaseTime * 1000 - new Date().getTime()) / 1000
-  );
+    return Math.floor(
+        (startTime + totalPhaseTime * 1000 - Date.now()) / 1000
+    );
 };
 
 /**
@@ -22,165 +22,166 @@ const remainingTime = (startTime: number, totalPhaseTime: number) => {
  * @param phaseChangeCallback Callback on each phase change e.g work -> rest
  */
 export const usePomodoroTimer = (
-  workingMinutes: number,
-  repsBetweenRests: number,
-  shortRestMinutes: number,
-  longRestMinutes: number,
-  phaseChangeCallback: (newPhase: pomodoroPhase) => void
+    workingMinutes: number,
+    repsBetweenRests: number,
+    shortRestMinutes: number,
+    longRestMinutes: number,
+    phaseChangeCallback: (newPhase: pomodoroPhase) => void
 ) => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [phase, setPhase] = useState<pomodoroPhase>("WORK");
-  const [startTime, setStartTime] = useState(new Date().getTime());
-  const [currentRep, setCurrentRep] = useState(0);
-  const [pomodoros, setPomodoros] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(
-    remainingTime(startTime, workingMinutes * 60)
-  );
-  const [pauseTimeLeft, setPauseTimeLeft] = useState(0);
+    const [isRunning, setIsRunning] = useState(false);
+    const [phase, setPhase] = useState<pomodoroPhase>("WORK");
+    const [startTime, setStartTime] = useState(new Date().getTime());
+    const [currentRep, setCurrentRep] = useState(0);
+    const [pomodoros, setPomodoros] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(
+        remainingTime(startTime, workingMinutes * 60)
+    );
+    const [pauseTimeLeft, setPauseTimeLeft] = useState(0);
 
-  const toggleIsRunning = () => {
-    if (!isRunning) {
-      setStartTime(new Date().getTime());
-    } else {
-      setPauseTimeLeft(timeLeft);
-    }
-    setIsRunning(!isRunning);
-  };
-
-  const restartPhase = () => {
-    setIsRunning(false);
-    switch (phase) {
-      case "WORK":
-        setPauseTimeLeft(0);
-        setTimeLeft(remainingTime(new Date().getTime(), workingMinutes * 60));
-        break;
-      case "SHORT REST":
-        setPauseTimeLeft(0);
-        setTimeLeft(remainingTime(new Date().getTime(), shortRestMinutes * 60));
-        break;
-      case "LONG REST":
-        setPauseTimeLeft(0);
-        setTimeLeft(remainingTime(new Date().getTime(), longRestMinutes * 60));
-        break;
-    }
-  };
-
-  const nextPhase = () => {
-    setIsRunning(false);
-    switch (phase) {
-      case "WORK":
-        setPauseTimeLeft(0);
-        if (currentRep + 1 >= repsBetweenRests) {
-          setTimeLeft(
-            remainingTime(new Date().getTime(), longRestMinutes * 60)
-          );
-          phaseChangeCallback("LONG REST");
-          setPhase("LONG REST");
+    const toggleIsRunning = () => {
+        if (!isRunning) {
+            setStartTime(Date.now());
         } else {
-          phaseChangeCallback("SHORT REST");
-          setTimeLeft(
-            remainingTime(new Date().getTime(), shortRestMinutes * 60)
-          );
-          setPhase("SHORT REST");
+            setPauseTimeLeft(timeLeft);
         }
-        break;
-      case "SHORT REST":
-        setPauseTimeLeft(0);
-        setTimeLeft(remainingTime(new Date().getTime(), shortRestMinutes * 60));
-        phaseChangeCallback("WORK");
-        setStartTime(new Date().getTime());
-        setPhase("WORK");
-        break;
-      case "LONG REST":
-        setPauseTimeLeft(0);
-        setTimeLeft(remainingTime(new Date().getTime(), longRestMinutes * 60));
-        phaseChangeCallback("WORK");
-        setStartTime(new Date().getTime());
-        setPhase("WORK");
-        break;
-    }
-  };
-
-  useEffect(() => {
-    let timeout: any;
-    let remaining: number;
-    if (isRunning) {
-      switch (phase) {
-        case "WORK":
-          remaining = remainingTime(
-            startTime,
-            pauseTimeLeft > 0 ? pauseTimeLeft : workingMinutes * 60
-          );
-          if (remaining >= 0) {
-            timeout = setTimeout(() => {
-              setTimeLeft(remaining);
-            }, 1000);
-          } else {
-            setStartTime(new Date().getTime());
-            if (currentRep + 1 >= repsBetweenRests) {
-              setPauseTimeLeft(0);
-              phaseChangeCallback("LONG REST");
-              setPhase("LONG REST");
-              setCurrentRep(currentRep + 1);
-            } else {
-              phaseChangeCallback("SHORT REST");
-              setPhase("SHORT REST");
-              setCurrentRep(currentRep + 1);
-            }
-          }
-          break;
-        case "SHORT REST":
-          remaining = remainingTime(
-            startTime,
-            pauseTimeLeft > 0 ? pauseTimeLeft : shortRestMinutes * 60
-          );
-          if (remaining >= 0) {
-            timeout = setTimeout(() => {
-              setTimeLeft(remaining);
-            }, 1000);
-          } else {
-            setPauseTimeLeft(0);
-            phaseChangeCallback("WORK");
-            setStartTime(new Date().getTime());
-            setPhase("WORK");
-          }
-          break;
-        case "LONG REST":
-          remaining = remainingTime(
-            startTime,
-            pauseTimeLeft > 0 ? pauseTimeLeft : longRestMinutes * 60
-          );
-          if (remaining >= 0) {
-            timeout = setTimeout(() => {
-              setTimeLeft(remaining);
-            }, 1000);
-          } else {
-            setPauseTimeLeft(0);
-            phaseChangeCallback("WORK");
-            setStartTime(new Date().getTime());
-            setCurrentRep(0);
-            setPomodoros(pomodoros + 1);
-            setPhase("WORK");
-          }
-          break;
-      }
-    }
-
-    return () => {
-      clearTimeout(timeout);
+        setIsRunning(!isRunning);
     };
-  });
 
-  return [
-    phase,
-    timeLeft,
-    pomodoros,
-    currentRep,
-    isRunning,
-    toggleIsRunning,
-    restartPhase,
-    nextPhase,
-  ] as const;
+    const restartPhase = () => {
+        setIsRunning(false);
+        switch (phase) {
+            case "WORK":
+                setPauseTimeLeft(0);
+                setTimeLeft(remainingTime(Date.now(), workingMinutes * 60));
+                break;
+            case "SHORT REST":
+                setPauseTimeLeft(0);
+                setTimeLeft(remainingTime(Date.now(), shortRestMinutes * 60));
+                break;
+            case "LONG REST":
+                setPauseTimeLeft(0);
+                setTimeLeft(remainingTime(Date.now(), longRestMinutes * 60));
+                break;
+        }
+    };
+
+    const nextPhase = () => {
+        setIsRunning(false);
+        switch (phase) {
+            case "WORK":
+                setPauseTimeLeft(0);
+                if (currentRep + 1 >= repsBetweenRests) {
+                    setTimeLeft(
+                        remainingTime(Date.now(), longRestMinutes * 60)
+                    );
+                    phaseChangeCallback("LONG REST");
+                    setPhase("LONG REST");
+                } else {
+                    phaseChangeCallback("SHORT REST");
+                    setTimeLeft(
+                        remainingTime(Date.now(), shortRestMinutes * 60)
+                    );
+                    setPhase("SHORT REST");
+                }
+                break;
+            case "SHORT REST":
+                setPauseTimeLeft(0);
+                setTimeLeft(remainingTime(Date.now(), shortRestMinutes * 60));
+                phaseChangeCallback("WORK");
+                setStartTime(Date.now());
+                setPhase("WORK");
+                break;
+            case "LONG REST":
+                setPauseTimeLeft(0);
+                setTimeLeft(remainingTime(Date.now(), longRestMinutes * 60));
+                phaseChangeCallback("WORK");
+                setStartTime(Date.now());
+                setPhase("WORK");
+                break;
+        }
+    };
+
+    useEffect(() => {
+        let timeout: any;
+        let remaining: number;
+        if (isRunning) {
+            switch (phase) {
+                case "WORK":
+                    remaining = remainingTime(
+                        startTime,
+                        pauseTimeLeft > 0 ? pauseTimeLeft : workingMinutes * 60
+                    );
+                    if (remaining >= 0) {
+                        timeout = setTimeout(() => {
+                            setTimeLeft(remaining);
+                        }, 1000);
+                    } else {
+                        setStartTime(Date.now());
+                        if (currentRep + 1 >= repsBetweenRests) {
+                            setPauseTimeLeft(0);
+                            phaseChangeCallback("LONG REST");
+                            setPhase("LONG REST");
+                            setCurrentRep(currentRep + 1);
+                        } else {
+                            phaseChangeCallback("SHORT REST");
+                            setPhase("SHORT REST");
+                            setCurrentRep(currentRep + 1);
+                        }
+                    }
+                    break;
+                case "SHORT REST":
+                    remaining = remainingTime(
+                        startTime,
+                        pauseTimeLeft > 0 ? pauseTimeLeft : shortRestMinutes * 60
+                    );
+                    if (remaining >= 0) {
+                        timeout = setTimeout(() => {
+                            setTimeLeft(remaining);
+                        }, 1000);
+                    } else {
+                        setPauseTimeLeft(0);
+                        phaseChangeCallback("WORK");
+                        setStartTime(Date.now());
+                        setPhase("WORK");
+                    }
+                    break;
+                case "LONG REST":
+                    remaining = remainingTime(
+                        startTime,
+                        pauseTimeLeft > 0 ? pauseTimeLeft : longRestMinutes * 60
+                    );
+                    if (remaining >= 0) {
+                        timeout = setTimeout(() => {
+                            setTimeLeft(remaining);
+                        }, 1000);
+                    } else {
+                        setPauseTimeLeft(0);
+                        phaseChangeCallback("WORK");
+                        setStartTime(Date.now());
+                        setCurrentRep(0);
+                        setPomodoros(pomodoros + 1);
+                        setPhase("WORK");
+                    }
+                    break;
+            }
+        }
+
+        return () => {
+            clearTimeout(timeout);
+        };
+    }, [currentRep, isRunning, longRestMinutes, pauseTimeLeft, phase, phaseChangeCallback, pomodoros, repsBetweenRests, shortRestMinutes, startTime, workingMinutes]);
+
+
+    return [
+        phase,
+        timeLeft,
+        pomodoros,
+        currentRep,
+        isRunning,
+        toggleIsRunning,
+        restartPhase,
+        nextPhase,
+    ] as const;
 };
 
 export default usePomodoroTimer;

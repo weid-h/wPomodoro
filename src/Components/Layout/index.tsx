@@ -4,6 +4,7 @@ import React from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import Timer from '../Pages/Timer'
 import Setup from '../Pages/Setup'
+import {Howl} from "howler";
 
 const PageContainer = styled(Container)({
     width: '100%',
@@ -11,7 +12,7 @@ const PageContainer = styled(Container)({
 })
 
 const Layout = (props: any) => {
-
+    const howl = new Howl({"src": "/Chime.wav"})
     return (
         <React.Fragment>
             <Router>
@@ -22,7 +23,7 @@ const Layout = (props: any) => {
                                 <Setup />
                             </Route>
                             <Route path="/timer">
-                                <Timer />
+                                <Timer howl={howl}/>
                             </Route>
                         </PageContainer>
                     </React.Fragment>
