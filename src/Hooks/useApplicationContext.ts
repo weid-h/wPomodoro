@@ -5,10 +5,10 @@ import {getSavedApplicationContext, saveApplicationContext} from "../IndexedDb/U
 
 export const useApplicationContext = () => {
     const [pomodoroSettings, setPomodoroSettings] = useState({
-        workingMinutes: 20,
+        workingMinutes: 25,
         longRestMinutes: 15,
         shortRestMinutes: 5,
-        workRepsBetweenRests: 3
+        workRepsBetweenRests: 4
     });
     const [hydrated, setHydrated] = useState(false)
 
@@ -23,7 +23,6 @@ export const useApplicationContext = () => {
 
     useEffect(() => {
         let isCancelled = false;
-        console.log("fired")
 
         if (!isCancelled && db && haveIndexedDb && !hydrated && !loading) {
             getSavedApplicationContext(db).then((settings) => {
