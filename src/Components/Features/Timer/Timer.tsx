@@ -9,14 +9,13 @@ import {
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import PauseIcon from "@material-ui/icons/Pause";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import SkipNextIcon from "@material-ui/icons/SkipNext";
+import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
+import { Howl } from "howler";
 import React, { useContext, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { AppContext } from "../../../Contexts/ApplicationContext";
 import useTimer from "./useTimer";
-import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
-import SkipNextIcon from "@material-ui/icons/SkipNext";
-import { Howl } from "howler";
-import { Helmet } from "react-helmet";
 
 const useStyles = makeStyles({
   Center: {
@@ -120,7 +119,7 @@ const Timer = (props: TimerProps) => {
           <Typography variant="h1">{timeString}</Typography>
         </Card>
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <Card variant="elevation">
           <Stats
             workPeriods={currentRep}
@@ -129,7 +128,7 @@ const Timer = (props: TimerProps) => {
             workReps={context.pomodoroSettings.workRepsBetweenRests}
           />
         </Card>
-      </Grid>
+      </Grid> */}
       <Grid item xs={4} className={classes.Center}>
         <Tooltip title="Restart this phase" aria-label="Restart this phase">
           <Button

@@ -26,14 +26,14 @@ const SettingContainer = (props: {
   header: string;
   label: "minutes" | "repetitions";
 }) => (
-  <Grid item xs={6} lg={3}>
+  <Grid item xs={12} md={3}>
     <Card>
       <CardContent>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid item xs={12} style={{ padding: 0 }}>
             <Typography variant="h6">{props.header}</Typography>
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} style={{ padding: 0 }}>
             <ValuePicker
               label={props.label}
               values={props.values}
