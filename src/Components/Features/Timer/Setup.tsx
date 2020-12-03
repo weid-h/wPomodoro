@@ -1,9 +1,17 @@
-import {Button, Card, CardContent, Grid, makeStyles, Tooltip, Typography,} from "@material-ui/core";
+import {
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  makeStyles,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
 import AlarmOnIcon from "@material-ui/icons/AlarmOn";
-import React, {useContext} from "react";
-import {Link} from "react-router-dom";
-import {AppContext} from "../../Contexts/ApplicationContext";
-import ValuePicker from "../Features/ValuePicker";
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { AppContext } from "../../../Contexts/ApplicationContext";
+import ValuePicker from "../ValuePicker";
 
 const useStyles = makeStyles({
   Center: {
@@ -39,7 +47,11 @@ const SettingContainer = (props: {
   </Grid>
 );
 
-const Setup = () => {
+interface SetupProps {
+  GoToTimer: () => void;
+}
+
+const Setup: React.FC<SetupProps> = (props) => {
   const classes = useStyles();
   const context = useContext(AppContext);
 
@@ -106,8 +118,7 @@ const Setup = () => {
           <Button
             variant="contained"
             color="primary"
-            component={Link}
-            to="/timer"
+            onClick={() => props.GoToTimer()}
           >
             <AlarmOnIcon />
           </Button>

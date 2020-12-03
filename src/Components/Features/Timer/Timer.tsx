@@ -11,8 +11,8 @@ import PauseIcon from "@material-ui/icons/Pause";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import React, { useContext, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { AppContext } from "../../Contexts/ApplicationContext";
-import useTimer from "../Features/Timer";
+import { AppContext } from "../../../Contexts/ApplicationContext";
+import useTimer from "./useTimer";
 import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
 import SkipNextIcon from "@material-ui/icons/SkipNext";
 import { Howl } from "howler";
@@ -76,6 +76,7 @@ const Stats = (props: statProps) => {
 
 type TimerProps = {
   howl: Howl;
+  GoToSetup: () => void;
 };
 
 const Timer = (props: TimerProps) => {
@@ -171,7 +172,11 @@ const Timer = (props: TimerProps) => {
       </Grid>
       <Grid item xs={12} className={classes.Center}>
         <Tooltip title="Back to setup" aria-label="Back to setup">
-          <Button color="secondary" variant="contained" component={Link} to="/">
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() => props.GoToSetup()}
+          >
             <ExitToAppIcon />
           </Button>
         </Tooltip>
