@@ -14,7 +14,8 @@ import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
 import { Howl } from "howler";
 import React, { useContext, useMemo } from "react";
 import { Helmet } from "react-helmet";
-import { AppContext } from "../../../Contexts/ApplicationContext";
+import { useSelector } from "react-redux";
+import { SelectPomodoroSettings } from "../../../State/reducers/PomodoroSettingsReducer/selectors";
 import useTimer from "./useTimer";
 
 const useStyles = makeStyles({
@@ -80,7 +81,7 @@ type TimerProps = {
 
 const Timer = (props: TimerProps) => {
   const classes = useStyles();
-  const context = useContext(AppContext);
+  const settings = useSelector(SelectPomodoroSettings);
 
   const {
     phase,
@@ -92,10 +93,10 @@ const Timer = (props: TimerProps) => {
     restartPhase,
     nextPhase,
   } = useTimer(
-    context.pomodoroSettings.workingMinutes,
-    context.pomodoroSettings.workRepsBetweenRests,
-    context.pomodoroSettings.shortRestMinutes,
-    context.pomodoroSettings.longRestMinutes,
+    settings.workingMinutes,
+    settings.workRepsBetweenRests,
+    settings.shortRestMinutes,
+    settings.longRestMinutes,
     () => {
       console.log("phasechangecallback called");
       props.howl.play();

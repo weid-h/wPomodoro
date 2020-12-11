@@ -9,8 +9,10 @@ import {
 } from "@material-ui/core";
 import AlarmOnIcon from "@material-ui/icons/AlarmOn";
 import React, { useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { AppContext } from "../../../Contexts/ApplicationContext";
+import { setPomodoroSettings } from "../../../State/reducers/PomodoroSettingsReducer/actions";
+import { SelectPomodoroSettings } from "../../../State/reducers/PomodoroSettingsReducer/selectors";
 import ValuePicker from "../ValuePicker";
 
 const useStyles = makeStyles({
@@ -53,7 +55,8 @@ interface SetupProps {
 
 const Setup: React.FC<SetupProps> = (props) => {
   const classes = useStyles();
-  const context = useContext(AppContext);
+  const settings = useSelector(SelectPomodoroSettings);
+  const dispatch = useDispatch();
 
   return (
     <Grid container spacing={3} className={classes.Center}>
@@ -63,12 +66,14 @@ const Setup: React.FC<SetupProps> = (props) => {
 
       <SettingContainer
         values={minuteValues()}
-        value={context.pomodoroSettings.workingMinutes}
+        value={settings.workingMinutes}
         setValue={(value: number) =>
-          context.setPomodoroSettings({
-            ...context.pomodoroSettings,
-            workingMinutes: value,
-          })
+          dispatch(
+            setPomodoroSettings({
+              ...settings,
+              workingMinutes: value,
+            })
+          )
         }
         label="minutes"
         header="Work period length:"
@@ -76,12 +81,14 @@ const Setup: React.FC<SetupProps> = (props) => {
 
       <SettingContainer
         values={["1", "2", "3", "4", "5", "6"]}
-        value={context.pomodoroSettings.workRepsBetweenRests}
+        value={settings.workRepsBetweenRests}
         setValue={(value: number) =>
-          context.setPomodoroSettings({
-            ...context.pomodoroSettings,
-            workRepsBetweenRests: value,
-          })
+          dispatch(
+            setPomodoroSettings({
+              ...settings,
+              workRepsBetweenRests: value,
+            })
+          )
         }
         label="repetitions"
         header="Reps between long rest:"
@@ -89,12 +96,14 @@ const Setup: React.FC<SetupProps> = (props) => {
 
       <SettingContainer
         values={minuteValues()}
-        value={context.pomodoroSettings.shortRestMinutes}
+        value={settings.shortRestMinutes}
         setValue={(value: number) =>
-          context.setPomodoroSettings({
-            ...context.pomodoroSettings,
-            shortRestMinutes: value,
-          })
+          dispatch(
+            setPomodoroSettings({
+              ...settings,
+              shortRestMinutes: value,
+            })
+          )
         }
         label="minutes"
         header="Short rest length:"
@@ -102,12 +111,14 @@ const Setup: React.FC<SetupProps> = (props) => {
 
       <SettingContainer
         values={minuteValues()}
-        value={context.pomodoroSettings.longRestMinutes}
+        value={settings.longRestMinutes}
         setValue={(value: number) =>
-          context.setPomodoroSettings({
-            ...context.pomodoroSettings,
-            longRestMinutes: value,
-          })
+          dispatch(
+            setPomodoroSettings({
+              ...settings,
+              longRestMinutes: value,
+            })
+          )
         }
         label="minutes"
         header="Long rest length:"

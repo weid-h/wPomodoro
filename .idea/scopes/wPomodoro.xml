@@ -1,3 +1,0 @@
-<component name="DependencyValidationManager">
-  <scope name="wPomodoro" pattern="file[wPomodoro]:*/&amp;&amp;!file:public/index.html" />
-</component>

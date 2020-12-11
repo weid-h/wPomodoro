@@ -1,15 +1,11 @@
-import {DBSchema} from "idb";
+import { DBSchema } from "idb";
+import { RootState } from "../State/reducers";
 
-export const userPomodoroSettingsKey = "userPomodoroSettings"
+export const userData = "userData";
 
 export interface pomodoroDb extends DBSchema {
-    pomodoroSettings: {
-        value: {
-            longRestMinutes: number,
-            shortRestMinutes: number,
-            workRepsBetweenRests: number,
-            workingMinutes: number,
-        },
-        key: string;
-    }
+  rootStore: {
+    value: RootState;
+    key: string;
+  };
 }
