@@ -17,6 +17,9 @@ import {
 } from "../../../State/reducers/ToDoReducer/actionTypes";
 import { executeToDoAction } from "../../../State/reducers/ToDoReducer/actions";
 import { Mission } from "../../../State/reducers/ToDoReducer/types";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import DeleteIcon from "@material-ui/icons/Delete";
+import IconButton from "@material-ui/core/IconButton";
 
 interface MissionRowProps {
   mission?: Mission;
@@ -31,7 +34,7 @@ const MissionRow: React.FC<MissionRowProps> = ({
 }) => {
   const dispatch = useDispatch();
   if (mission === undefined) {
-    return <></>;
+    return <>Error!</>;
   }
   return (
     <ListItem key={mission.id}>
@@ -72,12 +75,142 @@ const MissionRow: React.FC<MissionRowProps> = ({
   );
 };
 
+interface ToDoViewProps {
+  selectedMissionID: string;
+}
+
+const ToDoView: React.FC<ToDoViewProps> = (props) => {
+  const dispatch = useDispatch();
+  const tasks = useSelector(selectMissions).find(
+    (mission) => mission.id === props.selectedMissionID
+  )?.toDos;
+  const [taskInputValue, setTaskInputValue] = useState("");
+
+  if (tasks === undefined) {
+    return <>Error!</>;
+  }
+
+  const handleTaskEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      dispatch(
+        executeToDoAction({
+          type: ToDoActionTypes.AddToDo,
+          newToDoDescription: taskInputValue,
+          missionId: props.selectedMissionID,
+        })
+      );
+      setTaskInputValue("");
+    }
+  };
+  return (
+    <Grid container spacing={0}>
+      <Grid item xs={12}>
+        <TextField
+          id="standard-basic"
+          label="Add new task"
+          style={{ width: "100%" }}
+          inputProps={{
+            onKeyPress: handleTaskEnter,
+          }}
+          value={taskInputValue}
+          onChange={(e) => {
+            setTaskInputValue(e.target.value);
+          }}
+          autoComplete={"off"}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <List style={{ maxHeight: "30vh", overflowY: "scroll" }}>
+          {tasks
+            .filter((task) => task.complete === false)
+            .sort((a, b) => b.order - a.order)
+            .map((task) => (
+              <ListItem key={task.id}>
+                <ListItemIcon>
+                  <Checkbox
+                    edge="start"
+                    checked={task.complete}
+                    tabIndex={-1}
+                    disableRipple
+                    onClick={() => {
+                      dispatch(
+                        executeToDoAction({
+                          type: ToDoActionTypes.ToggleToDoComplete,
+                          parentMissionId: task.missionId,
+                          toDoToToggleID: task.id,
+                        })
+                      );
+                    }}
+                  />
+                </ListItemIcon>
+                <ListItemText>{task.description}</ListItemText>
+                <ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={() => {
+                      dispatch(
+                        executeToDoAction({
+                          type: ToDoActionTypes.RemoveToDo,
+                          parentMissionId: task.missionId,
+                          toDoToRemoveID: task.id,
+                        })
+                      );
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+        </List>
+      </Grid>
+      <Grid item xs={12}>
+        <List style={{ maxHeight: "30vh", overflowY: "scroll" }}>
+          {tasks
+            .filter((task) => task.complete === true)
+            .sort((a, b) => a.modifiedAt.getTime() - b.modifiedAt.getTime())
+            .map((task) => (
+              <ListItem key={task.id}>
+                <ListItemIcon>
+                  <Checkbox
+                    edge="start"
+                    checked={task.complete}
+                    tabIndex={-1}
+                    disableRipple
+                    color="primary"
+                    onClick={() => {
+                      dispatch(
+                        executeToDoAction({
+                          type: ToDoActionTypes.ToggleToDoComplete,
+                          parentMissionId: task.missionId,
+                          toDoToToggleID: task.id,
+                        })
+                      );
+                    }}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  style={{
+                    color: "grey",
+                    textDecoration: "line-through",
+                  }}
+                >
+                  {task.description}
+                </ListItemText>
+              </ListItem>
+            ))}
+        </List>
+      </Grid>
+    </Grid>
+  );
+};
+
 const ToDo = () => {
   const dispatch = useDispatch();
   const [selectedMissionID, setSelectedMissionID] = useState("");
   const [missionInputValue, setMissionInputValue] = useState("");
   const missions = useSelector(selectMissions);
-  const inputRef = useRef(null);
 
   const handleMissionEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -101,7 +234,6 @@ const ToDo = () => {
                 id="standard-basic"
                 label="Add new mission"
                 style={{ width: "100%" }}
-                ref={inputRef}
                 inputProps={{
                   onKeyPress: handleMissionEnter,
                 }}
@@ -109,6 +241,7 @@ const ToDo = () => {
                 onChange={(e) => {
                   setMissionInputValue(e.target.value);
                 }}
+                autoComplete={"off"}
               />
             </Grid>
           )}
@@ -140,30 +273,7 @@ const ToDo = () => {
       </Grid>
       <Grid item xs={12} lg={9}>
         {selectedMissionID !== "" && (
-          <Grid container spacing={0}>
-            <Grid item xs={12}>
-              <TextField
-                id="standard-basic"
-                label="Add new task"
-                style={{ width: "100%" }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <List style={{ maxHeight: "30vh", overflowY: "scroll" }}>
-                <ListItem button>
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      checked={true}
-                      tabIndex={-1}
-                      disableRipple
-                    />
-                  </ListItemIcon>
-                  <ListItemText>Askel 1 valmis</ListItemText>
-                </ListItem>
-              </List>
-            </Grid>
-          </Grid>
+          <ToDoView selectedMissionID={selectedMissionID} />
         )}
       </Grid>
     </Grid>

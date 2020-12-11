@@ -76,37 +76,52 @@ const ToDoReducer = (
       const missionToUpdateIndex = state.missions.findIndex(
         (mission) => mission.id === action.missionId
       );
-
-      if (missionToUpdateIndex > 0) {
-        const newToDo: ToDo = {
-          id: uuid(),
-          missionId: action.missionId,
-          description: action.newToDoDescription,
-          createdAt: new Date(),
-          modifiedAt: new Date(),
-          complete: false,
-          inProgress: false,
-          order: state.missions[missionToUpdateIndex].toDos.length + 1,
-        };
-        state.missions[missionToUpdateIndex].toDos.push(newToDo);
-      }
-      return { ...state };
+      const missions = state.missions.map((mission, index) =>
+        index === missionToUpdateIndex
+          ? {
+              ...mission,
+              toDos: [
+                ...mission.toDos,
+                {
+                  id: uuid(),
+                  missionId: action.missionId,
+                  description: action.newToDoDescription,
+                  createdAt: new Date(),
+                  modifiedAt: new Date(),
+                  complete: false,
+                  inProgress: false,
+                  order: mission.toDos.length + 1,
+                },
+              ],
+            }
+          : mission
+      );
+      return { ...state, missions: [...missions] };
     }
     case ActionTypes.RemoveToDo: {
       const parentMissionIndex = findMissionIndex(
         state.missions,
         action.parentMissionId
       );
-      if (parentMissionIndex > 0) {
-        const toDoToRemoveIndex = findToDoIndex(
-          state.missions[parentMissionIndex].toDos,
-          action.toDoToRemoveID
-        );
-        if (toDoToRemoveIndex > 0) {
-          state.missions[parentMissionIndex].toDos.splice(toDoToRemoveIndex, 1);
+      const updatedMissions = state.missions.map((mission, index) => {
+        if (index === parentMissionIndex) {
+          const toDoToRemoveIndex = mission.toDos.findIndex(
+            (todo) => todo.id === action.toDoToRemoveID
+          );
+          return {
+            ...mission,
+            toDos: [
+              ...mission.toDos.slice(0, toDoToRemoveIndex),
+              ...mission.toDos
+                .slice(toDoToRemoveIndex + 1)
+                .map((toDo) => ({ ...toDo, order: toDo.order - 1 })),
+            ],
+          };
         }
-      }
-      return { ...state };
+        return { ...mission, order: mission.order - 1 };
+      });
+
+      return { ...state, missions: updatedMissions };
     }
     case ActionTypes.UpdateToDoDescription: {
       const parentMissionIndex = findMissionIndex(
@@ -147,24 +162,31 @@ const ToDoReducer = (
       return { ...state };
     }
     case ActionTypes.ToggleToDoComplete: {
-      const parentMissionIndex = findMissionIndex(
-        state.missions,
-        action.parentMissionId
+      const missionToUpdateIndex = state.missions.findIndex(
+        (mission) => mission.id === action.parentMissionId
       );
-      if (parentMissionIndex >= 0) {
-        const toDoToUpdateIndex = findToDoIndex(
-          state.missions[parentMissionIndex].toDos,
-          action.toDoToToggleID
+      const missions = state.missions.map((mission, index) => {
+        const toDoToUpdateIndex = mission.toDos.findIndex(
+          (todo) => todo.id === action.toDoToToggleID
         );
-        if (toDoToUpdateIndex > 0) {
-          state.missions[parentMissionIndex].toDos[
-            toDoToUpdateIndex
-          ].complete = !state.missions[parentMissionIndex].toDos[
-            toDoToUpdateIndex
-          ].complete;
+        if (index === missionToUpdateIndex) {
+          return {
+            ...mission,
+            toDos: [
+              ...mission.toDos.map((toDo, index) => {
+                if (index === toDoToUpdateIndex) {
+                  return { ...toDo, complete: !toDo.complete };
+                } else {
+                  return toDo;
+                }
+              }),
+            ],
+          };
+        } else {
+          return mission;
         }
-      }
-      return { ...state };
+      });
+      return { ...state, missions: [...missions] };
     }
     case ActionTypes.HydrateToDoState: {
       return { ...action.data };

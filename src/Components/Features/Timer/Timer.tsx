@@ -112,12 +112,12 @@ const Timer = (props: TimerProps) => {
       </Helmet>
       <Grid item xs={12} className={classes.Center}>
         <Card variant="elevation">
-          <Typography variant="h3">{isRunning ? phase : "PAUSED"}</Typography>
+          <Typography variant="h6">{isRunning ? phase : "PAUSED"}</Typography>
         </Card>
       </Grid>
       <Grid item xs={12}>
         <Card variant="elevation" className={classes.Center}>
-          <Typography variant="h1">{timeString}</Typography>
+          <Typography variant="h4">{timeString}</Typography>
         </Card>
       </Grid>
       {/* <Grid item xs={12}>

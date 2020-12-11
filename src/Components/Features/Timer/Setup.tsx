@@ -60,10 +60,6 @@ const Setup: React.FC<SetupProps> = (props) => {
 
   return (
     <Grid container spacing={3} className={classes.Center}>
-      <Grid item xs={12}>
-        <Typography variant="h4">wPomodoro setup</Typography>
-      </Grid>
-
       <SettingContainer
         values={minuteValues()}
         value={settings.workingMinutes}
