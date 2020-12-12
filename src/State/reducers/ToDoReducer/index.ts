@@ -31,20 +31,35 @@ const ToDoReducer = (
       return { ...state, missions: [...state.missions, newMission] };
     }
     case ActionTypes.RemoveMission: {
-      const missionToRemoveIndex = state.missions.findIndex(
-        (mission) => mission.id === action.missionToRemoveID
+      const missionToRemoveIndex = findMissionIndex(
+        state.missions,
+        action.missionToRemoveID
       );
-      state.missions.splice(missionToRemoveIndex, 1);
-      return { ...state };
+      return {
+        ...state,
+        missions: [
+          ...state.missions.slice(0, missionToRemoveIndex),
+          ...state.missions.slice(missionToRemoveIndex + 1).map((mission) => ({
+            ...mission,
+            order: mission.order - 1,
+          })),
+        ],
+      };
     }
     case ActionTypes.UpdateMissionDescription: {
       const IndexToUpdate = state.missions.findIndex(
         (mission) => mission.id === action.missionToUpdateID
       );
-      if (IndexToUpdate >= 0) {
-        state.missions[IndexToUpdate].description = action.newDescription;
-      }
-      return { ...state };
+      const newMissions = state.missions.map((mission, index) => {
+        if (index === IndexToUpdate) {
+          return {
+            ...mission,
+            description: action.newDescription,
+          };
+        }
+        return mission;
+      });
+      return { ...state, missions: newMissions };
     }
     case ActionTypes.ToggleMissionProgress: {
       const IndexToUpdate = state.missions.findIndex(
@@ -128,18 +143,27 @@ const ToDoReducer = (
         state.missions,
         action.parentMissionId
       );
-      if (parentMissionIndex >= 0) {
-        const toDoToUpdateIndex = findToDoIndex(
-          state.missions[parentMissionIndex].toDos,
-          action.toDoToUpdateID
-        );
-        if (toDoToUpdateIndex > 0) {
-          state.missions[parentMissionIndex].toDos[
-            toDoToUpdateIndex
-          ].description = action.newDescription;
+      const newMissions = state.missions.map((mission, index) => {
+        if (index === parentMissionIndex) {
+          const toDoToUpdateIndex = mission.toDos.findIndex(
+            (todo) => todo.id === action.toDoToUpdateID
+          );
+          return {
+            ...mission,
+            toDos: mission.toDos.map((todo, index) => {
+              if (index === toDoToUpdateIndex) {
+                return {
+                  ...todo,
+                  description: action.newDescription,
+                };
+              }
+              return todo;
+            }),
+          };
         }
-      }
-      return { ...state };
+        return mission;
+      });
+      return { ...state, missions: newMissions };
     }
     case ActionTypes.ToggleToDoProgress: {
       const parentMissionIndex = findMissionIndex(
@@ -187,6 +211,87 @@ const ToDoReducer = (
         }
       });
       return { ...state, missions: [...missions] };
+    }
+    case ActionTypes.OrderMission: {
+      const indexOfMission = state.missions.findIndex(
+        (mission) => mission.id === action.missionId
+      );
+
+      const originalOrder = state.missions[indexOfMission].order;
+
+      let swapWith = originalOrder + action.steps;
+
+      if (swapWith > state.missions.length + 1) {
+        swapWith = state.missions.length + 1;
+      } else if (swapWith <= 1) {
+        swapWith = 1;
+      }
+
+      let swappedOriginal = false;
+      let swappedTarget = false;
+
+      return {
+        ...state,
+        missions: state.missions.map((mission) => {
+          if (mission.order === originalOrder && !swappedOriginal) {
+            swappedOriginal = true;
+            return { ...mission, order: swapWith };
+          } else if (mission.order === swapWith && !swappedTarget) {
+            swappedTarget = true;
+            return { ...mission, order: originalOrder };
+          } else {
+            return mission;
+          }
+        }),
+      };
+    }
+    case ActionTypes.OrderToDo: {
+      const indexOfMission = state.missions.findIndex(
+        (mission) => mission.id === action.parentMissionId
+      );
+
+      const updatedMissions = state.missions.map((mission, index) => {
+        if (indexOfMission !== index) {
+          return mission;
+        }
+
+        const indexOfTodo = mission.toDos.findIndex(
+          (todo) => todo.id === action.todoId
+        );
+
+        const originalOrder = mission.toDos[indexOfTodo].order;
+
+        let swapWith = originalOrder + action.steps;
+
+        if (swapWith > mission.toDos.length + 1) {
+          swapWith = mission.toDos.length + 1;
+        } else if (swapWith <= 1) {
+          swapWith = 1;
+        }
+
+        let swappedOriginal = false;
+        let swappedTarget = false;
+
+        return {
+          ...mission,
+          toDos: mission.toDos.map((todo) => {
+            if (todo.order === originalOrder && !swappedOriginal) {
+              swappedOriginal = true;
+              return { ...todo, order: swapWith };
+            } else if (todo.order === swapWith && !swappedTarget) {
+              swappedTarget = true;
+              return { ...todo, order: originalOrder };
+            } else {
+              return todo;
+            }
+          }),
+        };
+      });
+
+      return {
+        ...state,
+        missions: updatedMissions,
+      };
     }
     case ActionTypes.HydrateToDoState: {
       return { ...action.data };

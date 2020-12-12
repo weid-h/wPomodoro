@@ -8,18 +8,102 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-import React, { useRef, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { selectMissions } from "../../../State/reducers/ToDoReducer/selectors";
-import {
-  ToDoActionType,
-  ActionTypes as ToDoActionTypes,
-} from "../../../State/reducers/ToDoReducer/actionTypes";
-import { executeToDoAction } from "../../../State/reducers/ToDoReducer/actions";
-import { Mission } from "../../../State/reducers/ToDoReducer/types";
+import IconButton from "@material-ui/core/IconButton";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DeleteIcon from "@material-ui/icons/Delete";
-import IconButton from "@material-ui/core/IconButton";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { executeToDoAction } from "../../../State/reducers/ToDoReducer/actions";
+import { ActionTypes as ToDoActionTypes } from "../../../State/reducers/ToDoReducer/actionTypes";
+import { selectMissions } from "../../../State/reducers/ToDoReducer/selectors";
+import {
+  Mission,
+  ToDo as ToDoType,
+} from "../../../State/reducers/ToDoReducer/types";
+import EditIcon from "@material-ui/icons/Edit";
+import MoveUpIcon from "@material-ui/icons/KeyboardArrowUp";
+import MoveDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import DoneIcon from "@material-ui/icons/Done";
+import BackIcon from "@material-ui/icons/ArrowBack";
+interface EditRowDescriptionProps {
+  initialDescription: string;
+  handleComplete: (newDescription: string) => void;
+}
+const EditRowDescription: React.FC<EditRowDescriptionProps> = (props) => {
+  const [value, setValue] = useState(props.initialDescription);
+
+  const handleTaskEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      props.handleComplete(value);
+    } else if (e.key === "Escape") {
+      props.handleComplete(props.initialDescription);
+    }
+  };
+
+  return (
+    <ListItem>
+      <ListItemText>
+        <TextField
+          id="standard-basic"
+          label="Press enter to save or escape to cancel"
+          style={{ width: "100%" }}
+          inputProps={{
+            onKeyPress: handleTaskEnter,
+          }}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+          }}
+          autoComplete={"off"}
+        />
+      </ListItemText>
+      <ListItemSecondaryAction>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            props.handleComplete(value);
+          }}
+        >
+          <DoneIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
+    </ListItem>
+  );
+};
+
+interface ActiveMissionRowProps {
+  mission?: Mission;
+  backFn: () => void;
+}
+
+const ActiveMissionrow: React.FC<ActiveMissionRowProps> = ({
+  mission,
+  backFn,
+}) => {
+  if (mission === undefined) {
+    return <>Error!</>;
+  }
+
+  return (
+    <ListItem key={mission.id}>
+      <ListItemText style={{ textAlign: "center" }}>
+        <Typography variant="h5">{mission.description}</Typography>
+      </ListItemText>
+      <ListItemSecondaryAction>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            backFn();
+          }}
+        >
+          <BackIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
+    </ListItem>
+  );
+};
 
 interface MissionRowProps {
   mission?: Mission;
@@ -33,10 +117,26 @@ const MissionRow: React.FC<MissionRowProps> = ({
   selectedMissionID: missionID,
 }) => {
   const dispatch = useDispatch();
+  const [editing, setEditing] = useState(false);
+
   if (mission === undefined) {
     return <>Error!</>;
   }
-  return (
+  return editing ? (
+    <EditRowDescription
+      initialDescription={mission.description}
+      handleComplete={(newDescription) => {
+        dispatch(
+          executeToDoAction({
+            type: ToDoActionTypes.UpdateMissionDescription,
+            missionToUpdateID: mission.id,
+            newDescription: newDescription,
+          })
+        );
+        setEditing(false);
+      }}
+    />
+  ) : (
     <ListItem key={mission.id}>
       <ListItemIcon>
         <Checkbox
@@ -52,9 +152,15 @@ const MissionRow: React.FC<MissionRowProps> = ({
               })
             );
           }}
+          color="primary"
         />
       </ListItemIcon>
       <ListItemText
+        style={
+          mission.complete
+            ? { textDecoration: "line-through", color: "grey" }
+            : {}
+        }
         onClick={() => {
           dispatch(
             executeToDoAction({
@@ -71,6 +177,173 @@ const MissionRow: React.FC<MissionRowProps> = ({
       >
         {mission.description}
       </ListItemText>
+      <ListItemSecondaryAction>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            dispatch(
+              executeToDoAction({
+                type: ToDoActionTypes.OrderMission,
+                missionId: mission.id,
+                steps: 1,
+              })
+            );
+          }}
+        >
+          <MoveUpIcon />
+        </IconButton>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            dispatch(
+              executeToDoAction({
+                type: ToDoActionTypes.OrderMission,
+                missionId: mission.id,
+                steps: -1,
+              })
+            );
+          }}
+        >
+          <MoveDownIcon />
+        </IconButton>
+        <IconButton
+          edge="end"
+          aria-label="edit"
+          onClick={() => {
+            setEditing(true);
+          }}
+        >
+          <EditIcon />
+        </IconButton>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            dispatch(
+              executeToDoAction({
+                type: ToDoActionTypes.RemoveMission,
+                missionToRemoveID: mission.id,
+              })
+            );
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
+    </ListItem>
+  );
+};
+
+interface ToDoViewRowProps {
+  task: ToDoType;
+}
+
+const ToDoViewRow: React.FC<ToDoViewRowProps> = ({ task }) => {
+  const [editing, setEditing] = useState(false);
+  const dispatch = useDispatch();
+
+  return editing ? (
+    <EditRowDescription
+      initialDescription={task.description}
+      handleComplete={(newDescription) => {
+        dispatch(
+          executeToDoAction({
+            type: ToDoActionTypes.UpdateToDoDescription,
+            newDescription: newDescription,
+            parentMissionId: task.missionId,
+            toDoToUpdateID: task.id,
+          })
+        );
+        setEditing(false);
+      }}
+    />
+  ) : (
+    <ListItem key={task.id}>
+      <ListItemIcon>
+        <Checkbox
+          edge="start"
+          checked={task.complete}
+          tabIndex={-1}
+          disableRipple
+          onClick={() => {
+            dispatch(
+              executeToDoAction({
+                type: ToDoActionTypes.ToggleToDoComplete,
+                parentMissionId: task.missionId,
+                toDoToToggleID: task.id,
+              })
+            );
+          }}
+          color="primary"
+        />
+      </ListItemIcon>
+      <ListItemText
+        style={
+          task.complete ? { color: "grey", textDecoration: "line-through" } : {}
+        }
+      >
+        {task.description}
+      </ListItemText>
+      <ListItemSecondaryAction>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            dispatch(
+              executeToDoAction({
+                type: ToDoActionTypes.OrderToDo,
+                parentMissionId: task.missionId,
+                todoId: task.id,
+                steps: 1,
+              })
+            );
+          }}
+        >
+          <MoveUpIcon />
+        </IconButton>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            dispatch(
+              executeToDoAction({
+                type: ToDoActionTypes.OrderToDo,
+                parentMissionId: task.missionId,
+                todoId: task.id,
+                steps: -1,
+              })
+            );
+          }}
+        >
+          <MoveDownIcon />
+        </IconButton>
+        <IconButton
+          edge="end"
+          aria-label="edit"
+          onClick={() => {
+            setEditing(true);
+          }}
+        >
+          <EditIcon />
+        </IconButton>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            dispatch(
+              executeToDoAction({
+                type: ToDoActionTypes.RemoveToDo,
+                parentMissionId: task.missionId,
+                toDoToRemoveID: task.id,
+              })
+            );
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
     </ListItem>
   );
 };
@@ -91,7 +364,7 @@ const ToDoView: React.FC<ToDoViewProps> = (props) => {
   }
 
   const handleTaskEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && taskInputValue.length > 0) {
       dispatch(
         executeToDoAction({
           type: ToDoActionTypes.AddToDo,
@@ -102,6 +375,7 @@ const ToDoView: React.FC<ToDoViewProps> = (props) => {
       setTaskInputValue("");
     }
   };
+
   return (
     <Grid container spacing={0}>
       <Grid item xs={12}>
@@ -125,43 +399,7 @@ const ToDoView: React.FC<ToDoViewProps> = (props) => {
             .filter((task) => task.complete === false)
             .sort((a, b) => b.order - a.order)
             .map((task) => (
-              <ListItem key={task.id}>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    checked={task.complete}
-                    tabIndex={-1}
-                    disableRipple
-                    onClick={() => {
-                      dispatch(
-                        executeToDoAction({
-                          type: ToDoActionTypes.ToggleToDoComplete,
-                          parentMissionId: task.missionId,
-                          toDoToToggleID: task.id,
-                        })
-                      );
-                    }}
-                  />
-                </ListItemIcon>
-                <ListItemText>{task.description}</ListItemText>
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={() => {
-                      dispatch(
-                        executeToDoAction({
-                          type: ToDoActionTypes.RemoveToDo,
-                          parentMissionId: task.missionId,
-                          toDoToRemoveID: task.id,
-                        })
-                      );
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
+              <ToDoViewRow task={task} />
             ))}
         </List>
       </Grid>
@@ -171,34 +409,7 @@ const ToDoView: React.FC<ToDoViewProps> = (props) => {
             .filter((task) => task.complete === true)
             .sort((a, b) => a.modifiedAt.getTime() - b.modifiedAt.getTime())
             .map((task) => (
-              <ListItem key={task.id}>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    checked={task.complete}
-                    tabIndex={-1}
-                    disableRipple
-                    color="primary"
-                    onClick={() => {
-                      dispatch(
-                        executeToDoAction({
-                          type: ToDoActionTypes.ToggleToDoComplete,
-                          parentMissionId: task.missionId,
-                          toDoToToggleID: task.id,
-                        })
-                      );
-                    }}
-                  />
-                </ListItemIcon>
-                <ListItemText
-                  style={{
-                    color: "grey",
-                    textDecoration: "line-through",
-                  }}
-                >
-                  {task.description}
-                </ListItemText>
-              </ListItem>
+              <ToDoViewRow task={task} />
             ))}
         </List>
       </Grid>
@@ -213,7 +424,7 @@ const ToDo = () => {
   const missions = useSelector(selectMissions);
 
   const handleMissionEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && missionInputValue.length > 0) {
       dispatch(
         executeToDoAction({
           type: ToDoActionTypes.AddMission,
@@ -249,6 +460,7 @@ const ToDo = () => {
             <List style={{ maxHeight: "30vh", overflowY: "scroll" }}>
               {selectedMissionID === "" ? (
                 missions
+                  .filter((mission) => !mission.complete)
                   .sort((a, b) => b.order - a.order)
                   .map((mission) => (
                     <MissionRow
@@ -259,9 +471,8 @@ const ToDo = () => {
                     />
                   ))
               ) : (
-                <MissionRow
-                  setSelectedMissionId={setSelectedMissionID}
-                  selectedMissionID={selectedMissionID}
+                <ActiveMissionrow
+                  backFn={() => setSelectedMissionID("")}
                   mission={missions.find(
                     (mission) => mission.id === selectedMissionID
                   )}
@@ -269,8 +480,25 @@ const ToDo = () => {
               )}
             </List>
           </Grid>
+          <Grid item xs={12}>
+            <List style={{ maxHeight: "30vh", overflowY: "scroll" }}>
+              {selectedMissionID === "" &&
+                missions
+                  .filter((mission) => mission.complete)
+                  .sort((a, b) => b.order - a.order)
+                  .map((mission) => (
+                    <MissionRow
+                      key={mission.id}
+                      mission={mission}
+                      setSelectedMissionId={setSelectedMissionID}
+                      selectedMissionID={selectedMissionID}
+                    />
+                  ))}
+            </List>
+          </Grid>
         </Grid>
       </Grid>
+
       <Grid item xs={12} lg={9}>
         {selectedMissionID !== "" && (
           <ToDoView selectedMissionID={selectedMissionID} />

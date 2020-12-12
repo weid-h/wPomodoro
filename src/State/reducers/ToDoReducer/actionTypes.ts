@@ -13,6 +13,8 @@ export enum ActionTypes {
   ToggleMissionProgress = "TOGGLE_MISSION_PROGRESS",
   ToggleMissionComplete = "TOGGLE_MISSION_COMPLETE",
   HydrateToDoState = "HYDRATE_TODO_STATE",
+  OrderToDo = "ORDER_TODO",
+  OrderMission = "ORDER_MISSION",
 }
 
 interface AddToDo extends Action {
@@ -77,6 +79,19 @@ interface HydrateToDoState extends Action {
   data: ToDoState;
 }
 
+interface OrderToDo extends Action {
+  type: ActionTypes.OrderToDo;
+  parentMissionId: string;
+  todoId: string;
+  steps: number;
+}
+
+interface OrderMission extends Action {
+  type: ActionTypes.OrderMission;
+  missionId: string;
+  steps: number;
+}
+
 export type ToDoActionType =
   | AddToDo
   | RemoveToDo
@@ -88,4 +103,6 @@ export type ToDoActionType =
   | UpdateMissionDescription
   | ToggleMissionProgress
   | ToggleMissionComplete
-  | HydrateToDoState;
+  | HydrateToDoState
+  | OrderToDo
+  | OrderMission;

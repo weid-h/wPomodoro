@@ -19,6 +19,7 @@ const Layout: React.FC = (props) => {
       <PageContainer>
         <Timer />
       </PageContainer>
+      <hr/>
       <PageContainer>
         <ToDo />
       </PageContainer>
